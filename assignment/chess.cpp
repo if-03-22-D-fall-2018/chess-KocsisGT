@@ -4,269 +4,213 @@
  * Exercise Number: 6
  * Title:			chess.c
  * Author:			Kocsis Patrik
- * Due Date:		November 07, 2018
+ * Due Date:		November 11, 2018
  * ----------------------------------------------------------
  * Description:
  * Implementation of basic chess functions.
  * ----------------------------------------------------------
  */
 
- #include "chess.h"
- #include <stdio.h>
- #include <stdbool.h>
- #include "general.h"
+#include <stdlib.h>
+#include "general.h"
+#include "chess.h"
 
- bool is_piece(struct ChessPiece cp, enum Color color, enum PieceType type){
-   if(cp.color == color && cp.type == type){
-     return true;
-   }
-   return false;
+//Is Piece
+ bool is_piece(struct ChessPiece pc, enum Color color, enum PieceType type)
+ {
+   return pc.color == color && pc.type == type;
  }
 
- void init_chess_board(ChessBoard chess_board){
-   for(int i = 0; i < 8; i++){
-     for(int j = 0; j < 8; j++){
+//Chess Board
+ void init_chess_board(ChessBoard chess_board)
+ {
+   for (int i = 0; i < 8; i++) {
+     for (int j = 0; j < 8; j++) {
        chess_board[i][j].is_occupied = false;
+       chess_board[i][j].piece.type = NoPiece;
      }
    }
  }
 
- struct ChessSquare* get_square(ChessBoard chess_board, File file, Rank rank){
-   if((file > 'h' || file < 'a') && (rank > 8 || rank < 1)){
+//Get Square
+ struct ChessSquare* get_square (ChessBoard chess_board, File file, Rank rank)
+ {
+   if((file > 'h' || file < 'a') || (rank > 8 || rank < 1))
+   {
      return 0;
    }
-   return &chess_board[rank][file];
+   return &chess_board[rank-1][file-97];
  }
 
- bool is_square_occupied(ChessBoard chess_board, File file, Rank rank){
-   return chess_board[rank][file].is_occupied == true;
+//Occupied Square
+ bool is_square_occupied(ChessBoard chess_board, File file, Rank rank)
+ {
+   int int_file = file - 97;
+   return chess_board[rank-1][int_file].is_occupied;
  }
 
- bool add_piece(ChessBoard chess_board, File file, Rank rank, struct ChessPiece piece){
-   if(file >= 8 || rank >= 8 || file < 0 || rank < 0 ||chess_board[rank][file].is_occupied == true){
+//Add Piece
+ bool add_piece(ChessBoard chess_board, File file, Rank rank, struct ChessPiece piece)
+ {
+   int int_file = file - 97;
+   if((file > 'h' || file < 'a') || (rank > 8 || rank < 1) || chess_board[rank-1][int_file].is_occupied)
+   {
      return false;
    }
-
-   chess_board[rank][file].piece = piece;
- }
-
- struct ChessPiece get_piece(ChessBoard chess_board, File file, Rank rank){
-   struct ChessPiece piece;
-   if(file >= 8 || rank >= 8 || file < 0 || rank < 0 ||chess_board[rank][file].is_occupied == false){
-     piece.type = NoPiece;
-     return piece;
-   }
-
-   piece.type=chess_board[rank][file].piece.type;
-   piece.color=chess_board[rank][file].piece.color;
-   return piece;
- }
-
- void setup_chess_board(ChessBoard chess_board){
-
-   for(size_t i = 1; i < 8; i++){
-     chess_board[1][i].piece.type = Pawn;
-     chess_board[1][i].piece.color = White;
-     chess_board[1][i].is_occupied = true;
-   }
-
-   for(size_t i = 1; i < 8; i++){
-     chess_board[6][i].piece.type = Pawn;
-     chess_board[6][i].piece.color = Black;
-     chess_board[6][i].is_occupied = true;
-   }
-
-   chess_board[0][0].piece.type = Rook;
-   chess_board[0][0].piece.color = White;
-   chess_board[0][0].is_occupied = true;
-   chess_board[0][7].piece.type = Rook;
-   chess_board[0][7].piece.color = White;
-   chess_board[0][7].is_occupied = true;
-
-   chess_board[7][0].piece.type = Rook;
-   chess_board[7][0].piece.color = Black;
-   chess_board[7][0].is_occupied = true;
-   chess_board[7][7].piece.type = Rook;
-   chess_board[7][7].piece.color = Black;
-   chess_board[7][7].is_occupied = true;
-
-   chess_board[0][1].piece.type = Knight;
-   chess_board[0][1].piece.color = White;
-   chess_board[0][1].is_occupied = true;
-   chess_board[0][6].piece.type = Knight;
-   chess_board[0][6].piece.color = White;
-   chess_board[0][6].is_occupied = true;
-
-   chess_board[7][1].piece.type = Knight;
-   chess_board[7][1].piece.color = Black;
-   chess_board[7][1].is_occupied = true;
-   chess_board[7][6].piece.type = Knight;
-   chess_board[7][6].piece.color = Black;
-   chess_board[7][6].is_occupied = true;
-
-   chess_board[0][2].piece.type = Bishop;
-   chess_board[0][2].piece.color = White;
-   chess_board[0][2].is_occupied = true;
-   chess_board[0][5].piece.type = Bishop;
-   chess_board[0][5].piece.color = White;
-   chess_board[0][5].is_occupied = true;
-
-   chess_board[7][2].piece.type = Bishop;
-   chess_board[7][2].piece.color = Black;
-   chess_board[7][2].is_occupied = true;
-   chess_board[7][5].piece.type = Bishop;
-   chess_board[7][5].piece.color = Black;
-   chess_board[7][5].is_occupied = true;
-
-   chess_board[0][4].piece.type = Queen;
-   chess_board[0][4].piece.color = White;
-   chess_board[0][4].is_occupied = true;
-
-   chess_board[7][4].piece.type = Queen;
-   chess_board[7][4].piece.color = Black;
-   chess_board[7][4].is_occupied = true;
-
-   chess_board[0][3].piece.type = King;
-   chess_board[0][3].piece.color = White;
-   chess_board[0][3].is_occupied = true;
-
-   chess_board[7][3].piece.type = King;
-   chess_board[7][3].piece.color = Black;
-   chess_board[7][3].is_occupied = true;
- }
-
- bool remove_piece(ChessBoard chess_board, File file, Rank rank){
-   if(file >= 8 || rank >= 8 || file < 0 || rank < 0 ||chess_board[rank][file].is_occupied == false){
-     return false;
-   }
-   chess_board[rank][file].is_occupied = false;
+   chess_board[rank-1][int_file].is_occupied = true;
+   chess_board[rank-1][int_file].piece = piece;
    return true;
  }
 
- bool squares_share_file(File file, Rank rank, File file1, Rank rank1){
-   return file == file1;
+//Get Piece
+ struct ChessPiece get_piece(ChessBoard chess_board, File file, Rank rank)
+ {
+   int int_file = file - 97;
+   if(((file > 'h' || file < 'a') || (rank > 8 || rank < 1)) || chess_board[rank-1][int_file].is_occupied == false)
+   {
+     chess_board[rank-1][int_file].piece.type = NoPiece;
+     return chess_board[rank-1][int_file].piece;
+   }
+   return chess_board[rank-1][file-97].piece;
  }
 
- bool squares_share_rank(File file, Rank rank, File file1, Rank rank1){
-   return rank == rank1;
+//Chess Board Setup
+ void setup_chess_board(ChessBoard chess_board)
+ {
+   File file;
+   init_chess_board(chess_board);
+   for (file = 'a'; file <= 'h'; file++) {
+ 		add_piece(chess_board, file, 2, {White,Pawn});
+ 		add_piece(chess_board, file, 7, {Black, Pawn});
+ 	}
+   add_piece(chess_board, 'a', 1, {White, Rook});
+   add_piece(chess_board, 'h', 1, {White, Rook});
+   add_piece(chess_board, 'b', 1, {White, Knight});
+   add_piece(chess_board, 'g', 1, {White, Knight});
+   add_piece(chess_board, 'c', 1, {White, Bishop});
+ 	 add_piece(chess_board, 'f', 1, {White, Bishop});
+ 	 add_piece(chess_board, 'd', 1, {White, Queen});
+ 	 add_piece(chess_board, 'e', 1, {White, King});
+ 	 add_piece(chess_board, 'a', 8, {Black, Rook});
+ 	 add_piece(chess_board, 'h', 8, {Black, Rook});
+ 	 add_piece(chess_board, 'b', 8, {Black, Knight});
+   add_piece(chess_board, 'g', 8, {Black, Knight});
+   add_piece(chess_board, 'c', 8, {Black, Bishop});
+ 	 add_piece(chess_board, 'f', 8, {Black, Bishop});
+ 	 add_piece(chess_board, 'd', 8, {Black, Queen});
+ 	 add_piece(chess_board, 'e', 8, {Black, King});
  }
 
- bool squares_share_diagonal(File file, Rank rank, File file1, Rank rank1){
-   return file == file1 && rank == rank1;
- }
-
- bool squares_share_kings_move(File file, Rank rank, File file1, Rank rank1){
-   if(chess_board[rank-1][file-1] == chess_board[rank1][file1]){
-     return true;
-   }
-   else if(chess_board[rank][file-1] == chess_board[rank1][file1]){
-     return true;
-   }
-   else if(chess_board[rank+1][file-1] == chess_board[rank1][file1]){
-     return true;
-   }
-   else if(chess_board[rank-1][file] == chess_board[rank1][file1]){
-     return true;
-   }
-   else if(chess_board[rank+1][file] == chess_board[rank1][file1]){
-     return true;
-   }
-   else if(chess_board[rank-1][file+1] == chess_board[rank1][file1]){
-     return true;
-   }
-   else if(chess_board[rank][file+1] == chess_board[rank1][file1]){
-     return true;
-   }
-   else if(chess_board[rank+1][file+1] == chess_board[rank1][file1]){
-     return true;
-   }
-   else{
+//Remove Piece
+ bool remove_piece(ChessBoard chess_board, File file, Rank rank)
+ {
+   int int_file = file - 97;
+   if(((file > 'h' || file < 'a') || (rank > 8 || rank < 1)) || chess_board[rank-1][int_file].is_occupied == false)
+   {
      return false;
    }
+   chess_board[rank-1][int_file].is_occupied = false;
+   chess_board[rank-1][int_file].piece.type = NoPiece;
+   return true;
  }
 
- bool squares_share_pawns_move(enum Color color, enum Move NormalMove, File file, Rank rank, File file1, Rank rank1){
-
+//File
+ bool squares_share_file(File s1_f, Rank s1_r, File s2_f, Rank s2_r)
+ {
+   if((s1_f > 'h' || s1_f < 'a') || (s2_f > 'h' || s2_f < 'a') || (s1_r > 8 || s1_r < 1) || (s2_r > 8 || s2_r < 1))
+   {
+     return false;
+   }
+   return (s1_f == s2_f);
  }
 
- bool squares_share_queens_move(File file, Rank rank, File file1, Rank rank1){
-   for(size_t i = rank; i < 8-rank; i++){
-     if(chess_board[rank + i][file] == chess_board[rank1][file1]){
-       return true;
+//Rank
+ bool squares_share_rank(File s1_f, Rank s1_r, File s2_f, Rank s2_r)
+ {
+   if((s1_f > 'h' || s1_f < 'a') || (s2_f > 'h' || s2_f < 'a') || (s1_r > 8 || s1_r < 1) || (s2_r > 8 || s2_r < 1))
+   {
+     return false;
+   }
+   return (s1_r == s2_r);
+ }
+
+//Diagonal
+ bool squares_share_diagonal(File s1_f, Rank s1_r, File s2_f, Rank s2_r)
+ {
+   if((s1_f > 'h' || s1_f < 'a') || (s2_f > 'h' || s2_f < 'a') || (s1_r > 8 || s1_r < 1) || (s2_r > 8 || s2_r < 1))
+   {
+     return false;
+   }
+   return (s1_f - s2_f == s1_r - s2_r || s2_f - s1_f == s2_r - s1_r || s2_f - s1_f == s1_r - s2_r);
+ }
+
+//Knight Move
+ bool squares_share_knights_move(File s1_f, Rank s1_r, File s2_f, Rank s2_r)
+ {
+   if((s1_f > 'h' || s1_f < 'a') || (s2_f > 'h' || s2_f < 'a') || (s1_r > 8 || s1_r < 1) || (s2_r > 8 || s2_r < 1))
+   {
+     return false;
+   }
+   return ((s2_f == s1_f+1 && s2_r == s1_r+2) || (s2_f == s1_f-1 && s2_r == s1_r-2) || (s2_f == s1_f-2 && s2_r == s1_r-1) || (s2_f == s1_f+2 && s2_r == s1_r+1)
+    || (s2_f == s1_f-1 && s2_r == s1_r+2) || (s2_f == s1_f+1 && s2_r == s1_r-2)|| (s2_f == s1_f+2 && s2_r == s1_r-1) || (s2_f == s1_f-2 && s2_r == s1_r+1));
+ }
+
+//Pawn Move
+ bool squares_share_pawns_move(enum Color color, enum Move move, File s1_f, Rank s1_r, File s2_f, Rank s2_r)
+ {
+   if (move == CaptureMove)
+   {
+     if (color == Black)
+     {
+       return (s2_f == s1_f+1 && s2_r == s1_r-1) || (s2_f == s1_f-1 && s2_r == s1_r-1);
+     }
+     else
+     {
+       return (s2_f == s1_f-1 && s2_r == s1_r+1) || (s2_f == s1_f+1 && s2_r == s1_r+1);
      }
    }
-
-   for(size_t i = rank; i < 8-rank; i--){
-     if(chess_board[rank - i][file] == chess_board[rank1][file1]){
-       return true;
-   }
-
-   for(size_t i = file; i < 8-file; i++){
-     if(chess_board[rank][file+i] == chess_board[rank1][file1]){
-       return true;
+   if (move == NormalMove)
+   {
+     if (s1_r == 1 || s1_r == 8)
+     {
+       return false;
      }
-   }
-
-   for(size_t i = file; i < 8-file; i--){
-     if(chess_board[rank][file-i] == chess_board[rank1][file1]){
-       return true;
-   }
-
-   for(size_t i = rank; i < 8-rank; i++){
-     for(size_t j = file; j < 8-file; j++){
-       if(chess_board[rank + i][file + i] == chess_board[rank1][file1]){
-         return true;
-       }
+     if (color == Black && s1_r == 7)
+     {
+       return ((s2_r == s1_r-2 && s2_f == s1_f) || (s2_r == s1_r-1 && s2_f == s1_f));
      }
-   }
-
-   for(size_t i = rank; i < 8-rank; i++){
-     for(size_t j = file; j < 8-file; j++){
-       if(chess_board[rank - i][file - i] == chess_board[rank1][file1]){
-         return true;
-       }
+     else if (color == White && s1_r == 2)
+     {
+       return ((s2_r == s1_r+2 && s2_f == s1_f) || (s2_r == s1_r+1 && s2_f == s1_f));
      }
-   }
-
-   for(size_t i = rank; i < 8-rank; i++){
-     for(size_t j = file; j < 8-file; j++){
-       if(chess_board[rank + i][file - i] == chess_board[rank1][file1]){
-         return true;
-       }
+     if (color == Black && s1_r >= 4)
+     {
+       return (s2_r == s1_r-1 && s2_f == s1_f);
      }
-   }
-
-   for(size_t i = rank; i < 8-rank; i++){
-     for(size_t j = file; j < 8-file; j++){
-       if(chess_board[rank - i][file + i] == chess_board[rank1][file1]){
-         return true;
-       }
+     else if (color == White && s1_r <= 4)
+     {
+       return (s2_r == s1_r+1 && s2_f == s1_f);
      }
    }
    return false;
  }
 
- bool squares_share_knights_move(File file, Rank rank, File file1, Rank rank1){
-   for(size_t i = rank; i < 8-rank; i++){
-     if(chess_board[rank + i][file] == chess_board[rank1][file1]){
-       return true;
-     }
+//Queen Move
+ bool squares_share_queens_move(File s1_f, Rank s1_r, File s2_f, Rank s2_r)
+ {
+   if((s1_f > 'h' || s1_f < 'a') || (s2_f > 'h' || s2_f < 'a') || (s1_r > 8 || s1_r < 1) || (s2_r > 8 || s2_r < 1))
+   {
+     return false;
    }
+   return squares_share_rank(s1_f,s1_r,s2_f,s2_r) || squares_share_file(s1_f,s1_r,s2_f,s2_r) || squares_share_diagonal(s1_f,s1_r,s2_f,s2_r);
+ }
 
-   for(size_t i = rank; i < 8-rank; i--){
-     if(chess_board[rank - i][file] == chess_board[rank1][file1]){
-       return true;
+//King Move
+ bool squares_share_kings_move(File s1_f, Rank s1_r, File s2_f, Rank s2_r)
+ {
+   if((s1_f > 'h' || s1_f < 'a') || (s2_f > 'h' || s2_f < 'a') || (s1_r > 8 || s1_r < 1) || (s2_r > 8 || s2_r < 1))
+   {
+     return false;
    }
-
-   for(size_t i = file; i < 8-file; i++){
-     if(chess_board[rank][file+i] == chess_board[rank1][file1]){
-       return true;
-     }
-   }
-
-   for(size_t i = file; i < 8-file; i--){
-     if(chess_board[rank][file-i] == chess_board[rank1][file1]){
-       return true;
-   }
-   return false;
+   return squares_share_rank(s1_f,s1_r,s2_f,s2_r) || squares_share_file(s1_f,s1_r,s2_f,s2_r) || squares_share_diagonal(s1_f,s1_r,s2_f,s2_r);
  }
